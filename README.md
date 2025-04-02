@@ -11,6 +11,7 @@ Claim disini : https://faucet-assam.tea.xyz/#/
 # Deploy Token
 Deploy Disini : https://sepolia.tea.xyz/address/0x847d23084C474E7a0010Da5Fa869b40b321C8D7b?tab=write_contract
 Notes : Sesudah deploy, copy contract address token kalian
+---
 
 # Install NPM dulu di Linux
 Command : apt install npm
@@ -18,6 +19,7 @@ Command : apt install npm
 # Clone repositorynya
 Clone dulu : git clone https://github.com/freezydkz/Bulk-transfer-tea.git
 cd ke folder Bulk Transfernya : cd Bulk-transfer-tea
+---
 
 # Install Dependencies
 npm install ethers
