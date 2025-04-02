@@ -4,6 +4,7 @@ Send bulk transfer for Tea sepolia testnet
 Kalian bisa transfer tea secara massal ke banyak alamat di jaringan Tea Sepolia , Kalian setting setting aja ntar botnya mau kirim berapa berapanya dan ngatur jumlah token secara acak .
 
 **SEBELUM MEMULAI ALANGKAH BAIKNYA LAKUKAN BEBERAPA HAL BERIKUT INI**
+
 # Claim Faucet kalian
 Claim disini : https://faucet-assam.tea.xyz/#/
 
@@ -15,8 +16,8 @@ Notes : Sesudah deploy, copy contract address token kalian
 Command : apt install npm
 
 # Clone repositorynya
-git clone https://github.com/freezydkz/Bulk-transfer-tea.git
-cd Bulk-transfer-tea
+Clone dulu : git clone https://github.com/freezydkz/Bulk-transfer-tea.git
+cd ke folder Bulk Transfernya : cd Bulk-transfer-tea
 
 # Install Dependencies
 npm install ethers
