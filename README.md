@@ -51,6 +51,14 @@ Step by Step menggunakan botnya :
 - Masukkan jumlah penerima dan Jumlah token yang akan dikirim
 - Selesai, selamat berbulking bulking ria~
 
+Notes :
+- Kalo kalian pengen botnya jalan di background, pencet CTRL A + D .
+- Kalo kalian mau balikin lagi botnya , pakai command ini
+```
+screen -r bulktransfer
+```
+- Kalo kalian mau matiin, tinggal klik CTRL + C
+
 Join our telegram community here : https://t.me/ETRxCrypto
 
 Thanks for the Source :
