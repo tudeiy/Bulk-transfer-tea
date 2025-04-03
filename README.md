@@ -15,9 +15,12 @@ Deploy Disini : https://sepolia.tea.xyz/address/0x847d23084C474E7a0010Da5Fa869b4
 **Notes : Sesudah deploy, copy contract address token kalian**
 
 
-# Install NPM dulu di Linux
+# Install NPM dan dotenv dulu di Linux
 ```
 apt install npm
+```
+```
+npm install dotenv
 ```
 
 # Clone repositorynya
