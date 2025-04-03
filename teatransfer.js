@@ -1,12 +1,17 @@
+require("dotenv").config(); // Load variabel lingkungan dari .env
 const { ethers } = require("ethers");
 const readline = require("readline");
-require("dotenv").config();
 
-// Konfigurasi jaringan Tea Sepolia
-const RPC_URL = process.env.RPC_URL || "https://tea-sepolia.g.alchemy.com/public";
-const CHAIN_ID = 10218;
-const PRIVATE_KEY = process.env.PRIVATE_KEY || "PRIVATE_KEY_KALIAN";
-const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS || "CONTRACT_ADDRESS";
+// Mengambil konfigurasi dari file .env
+const RPC_URL = process.env.RPC_URL;
+const CHAIN_ID = process.env.CHAIN_ID;
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS;
+
+if (!PRIVATE_KEY || !RPC_URL || !TOKEN_ADDRESS || !CHAIN_ID) {
+    console.error("? ERROR: Pastikan file .env sudah dikonfigurasi dengan benar.");
+    process.exit(1);
+}
 
 // ABI ERC-20 minimal untuk transfer token
 const ERC20_ABI = [
@@ -15,7 +20,10 @@ const ERC20_ABI = [
 ];
 
 // Inisialisasi provider dan wallet
-const provider = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID);
+const provider = new ethers.JsonRpcProvider(RPC_URL, {
+    chainId: 10218, // Chain ID untuk Tea Sepolia
+    name: "tea-sepolia"
+});
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 const tokenContract = new ethers.Contract(TOKEN_ADDRESS, ERC20_ABI, wallet);
 
