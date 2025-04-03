@@ -102,7 +102,7 @@ async function main() {
 
         console.log(`📋 Ada ${recipients.length} alamat yang belum menerima token.`);
         
-        let transactionLimit = Math.min(recipients.length, Math.floor(Math.random() * (200 - 150 + 1) + 100));
+        let transactionLimit = Math.min(recipients.length, Math.floor(Math.random() * (200 - 101 + 1) + 100));
         console.log(`🔄 Akan mengirim ${transactionLimit} transaksi hari ini.`);
 
         let failedRecipients = [];
