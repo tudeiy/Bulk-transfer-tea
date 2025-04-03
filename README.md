@@ -39,6 +39,9 @@ Step by Step menggunakan botnya :
 - Cari bagian CONTRACT_ADDRESS dan paste contract address token kalian
 - Cari bagian RPC_URL dan CHAIN_ID , pastikan sesuai dengan RPC dan Chain ID terbaru Tea Sepolia
 - Save file teatransfernya
-- Jalankan scriptnya pake command ini : node teatransfer.js ( paste di vps kalian )
+- Jalankan scriptnya pake command ini :
+```
+  node teatransfer.js
+```
 - Masukkan jumlah penerima dan Jumlah token yang akan dikirim
 - Selesai, selamat berbulking bulking ria~
