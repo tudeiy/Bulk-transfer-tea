@@ -11,6 +11,7 @@ Claim disini : https://faucet-assam.tea.xyz/#/
 
 # Deploy Token
 Deploy Disini : https://sepolia.tea.xyz/address/0x847d23084C474E7a0010Da5Fa869b40b321C8D7b?tab=write_contract
+
 **Notes : Sesudah deploy, copy contract address token kalian**
 
 
