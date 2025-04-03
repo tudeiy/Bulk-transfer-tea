@@ -37,44 +37,65 @@ function generateRandomAddresses(count) {
     return addresses;
 }
 
-async function main() {
+// ?? FITUR BARU: Jam eksekusi yang diperbolehkan
+const allowedHours = [8, 12, 15, 19, 21];
+
+// ?? FITUR BARU: Pilih jam eksekusi secara acak
+function getRandomExecutionTime() {
+    return allowedHours[Math.floor(Math.random() * allowedHours.length)];
+}
+
+// ?? FITUR BARU: Tunggu hingga jam eksekusi tiba
+async function waitUntilExecution() {
+    let now = new Date();
+    let targetHour = getRandomExecutionTime();
+    
+    let executionTime = new Date();
+    executionTime.setHours(targetHour, 0, 0, 0);
+
+    if (executionTime < now) {
+        executionTime.setDate(executionTime.getDate() + 1); // Jika lewat, pindah ke hari berikutnya
+    }
+
+    let waitTime = executionTime - now;
+    console.log(`Menunggu hingga jam ${targetHour}:00 untuk mulai mengirim...`);
+    return new Promise(resolve => setTimeout(resolve, waitTime));
+}
+
+// ?? FITUR BARU: Delay antar transaksi (5 detik)
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ?? FITUR BARU: Fungsi otomatis untuk mengirim transaksi
+async function autoSendTokens() {
+    await waitUntilExecution(); // Tunggu waktu eksekusi
+
     try {
         const decimals = await tokenContract.decimals();
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
+        const transactionCount = Math.floor(Math.random() * (300 - 100 + 1) + 100); // Random 100 - 300 transaksi
+        console.log(`Memulai pengiriman ${transactionCount} transaksi...`);
 
-        rl.question("Masukkan berapa banyak penerima tokennya: ", (recipientCountInput) => {
-            const recipientCount = parseInt(recipientCountInput);
-            if (isNaN(recipientCount) || recipientCount <= 0) {
-                console.log("Jumlah alamat harus berupa angka positif.");
-                rl.close();
-                return;
+        for (let i = 0; i < transactionCount; i++) {
+            let recipient = ethers.Wallet.createRandom().address; // Menggunakan alamat acak
+            const amountToSend = ethers.parseUnits("1.0", decimals); // Kirim 1 token (ubah sesuai kebutuhan)
+
+            try {
+                const tx = await tokenContract.transfer(recipient, amountToSend);
+                await tx.wait();
+                console.log(`${i + 1}. Berhasil dikirim ke ${recipient}`);
+            } catch (error) {
+                console.log(`${i + 1}. Gagal dikirim ke ${recipient} - ${error.message}`);
             }
 
-            rl.question("Masukkan jumlah token per alamat: ", async (inputAmount) => {
-                const amountToSend = ethers.parseUnits(inputAmount, decimals);
-                const recipients = generateRandomAddresses(recipientCount);
-                console.log(`\n=== Kirim Token ke ${recipientCount} alamat ===\n`);
+            await delay(5000); // Jeda 5 detik antar transaksi
+        }
 
-                for (let i = 0; i < recipients.length; i++) {
-                    try {
-                        const tx = await tokenContract.transfer(recipients[i], amountToSend);
-                        await tx.wait();
-                        console.log(`${i + 1}. Transaksi Berhasil (${recipients[i]})`);
-                    } catch (error) {
-                        console.log(`${i + 1}. Transaksi Gagal (${recipients[i]}) - ${error.message}`);
-                    }
-                }
-
-                console.log("\n=== Semua transaksi selesai ===");
-                rl.close();
-            });
-        });
+        console.log("? Semua transaksi selesai.");
     } catch (error) {
-        console.error("Terjadi kesalahan:", error);
+        console.error("? Terjadi kesalahan:", error);
     }
 }
 
-main();
+// ?? Jalankan mode otomatis
+autoSendTokens();
