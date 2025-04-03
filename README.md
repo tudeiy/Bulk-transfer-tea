@@ -37,11 +37,11 @@ npm install ethers
 
 Step by Step menggunakan botnya :
 - Pastikan kalian sudah menyelesaikan semua hal diatas
-- Buka teatransfer.js di editor text vps kalian
+- Buka file .env di editor text vps kalian
 - Cari bagian PRIVATE_KEY_KALIAN dan isi dengan private key kalian
 - Cari bagian CONTRACT_ADDRESS dan paste contract address token kalian
 - Cari bagian RPC_URL dan CHAIN_ID , pastikan sesuai dengan RPC dan Chain ID terbaru Tea Sepolia
-- Save file teatransfernya
+- Save file .env nya
 - Jalankan scriptnya pake command ini :
 ```
   node teatransfer.js
