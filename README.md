@@ -19,13 +19,12 @@ Notes : Sesudah deploy, copy contract address token kalian
 ```
 apt install npm
 
-```
+
 # Clone repositorynya
 ```
-
 git clone https://github.com/freezydkz/Bulk-transfer-tea.git
 cd Bulk-transfer-tea
-
+```
 
 # Install Dependencies
 
