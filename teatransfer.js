@@ -70,21 +70,3 @@ async function main() {
 }
 
 main();
-
-// .gitignore file
-const fs = require('fs');
-const gitignoreContent = `
-# Environment variables
-.env
-
-# Node modules
-node_modules/
-
-# Log files
-*.log
-
-# Build artifacts
-dist/
-`;
-fs.writeFileSync(".gitignore", gitignoreContent);
-console.log(".gitignore telah dibuat!");
