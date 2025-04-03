@@ -11,20 +11,25 @@ Claim disini : https://faucet-assam.tea.xyz/#/
 
 # Deploy Token
 Deploy Disini : https://sepolia.tea.xyz/address/0x847d23084C474E7a0010Da5Fa869b40b321C8D7b?tab=write_contract
+```
 Notes : Sesudah deploy, copy contract address token kalian
 ```
 
 # Install NPM dulu di Linux
-Command : apt install npm
+```
+apt install npm
 
 ```
 # Clone repositorynya
 Clone dulu : git clone https://github.com/freezydkz/Bulk-transfer-tea.git
 cd ke folder Bulk Transfernya : cd Bulk-transfer-tea
-```
+
 
 # Install Dependencies
+
+```
 npm install ethers
+```
 
 Step by Step menggunakan botnya :
 - Pastikan kalian sudah menyelesaikan semua hal diatas
@@ -33,6 +38,6 @@ Step by Step menggunakan botnya :
 - Cari bagian CONTRACT_ADDRESS dan paste contract address token kalian
 - Cari bagian RPC_URL dan CHAIN_ID , pastikan sesuai dengan RPC dan Chain ID terbaru Tea Sepolia
 - Save file teatransfernya
-- Jalankan scriptnya pake command ini : node transfer.js ( paste di vps kalian )
+- Jalankan scriptnya pake command ini : node teatransfer.js ( paste di vps kalian )
 - Masukkan jumlah penerima dan Jumlah token yang akan dikirim
 - Selesai, selamat berbulking bulking ria~
