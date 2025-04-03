@@ -23,6 +23,12 @@ Deploy Disini : https://sepolia.tea.xyz/address/0x847d23084C474E7a0010Da5Fa869b4
 git clone https://github.com/freezydkz/Bulk-transfer-tea.git
 cd Bulk-transfer-tea
 ```
+
+# Create screen ( Biar bisa running di background )
+```
+screen -Rd bulktransfer
+```
+
 # Install NPM dan dotenv dulu di Linux
 ```
 apt install npm
