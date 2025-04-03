@@ -58,7 +58,7 @@ async function fetchKYCAddresses() {
 }
 
 // Waktu operasi dalam jam WIB
-const operationalHours = [8, 12, 15, 19, 21];
+const operationalHours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
 
 // Fungsi untuk menunggu sampai jam operasi
 async function waitForNextRun() {
@@ -71,7 +71,7 @@ async function waitForNextRun() {
             return;
         }
         
-        console.log("🕒 Di luar jam operasi, menunggu...");
+        console.log("Masih Di luar jam operasi, tunggu ya...");
         await new Promise(resolve => setTimeout(resolve, 60000)); // Cek setiap 1 menit
     }
 }
