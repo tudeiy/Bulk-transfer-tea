@@ -21,8 +21,10 @@ apt install npm
 
 ```
 # Clone repositorynya
-Clone dulu : git clone https://github.com/freezydkz/Bulk-transfer-tea.git
-cd ke folder Bulk Transfernya : cd Bulk-transfer-tea
+```
+
+git clone https://github.com/freezydkz/Bulk-transfer-tea.git
+cd Bulk-transfer-tea
 
 
 # Install Dependencies
