@@ -1,9 +1,13 @@
 # **Bulk-transfer-tea By ETRx Crypto**
 Send bulk transfer for Tea sepolia testnet
 
-Kalian bisa transfer tea secara massal ke banyak alamat di jaringan Tea Sepolia , Kalian setting setting aja ntar botnya mau kirim berapa berapanya dan ngatur jumlah token secara acak .
+Fitur :
+- Autosend Token Kalian secara random seharian ke user yang sudah KYC di tea ( Source database ada di bagian paling bawah )
+- Pengiriman token di set secara random dari jam 8 pagi sampai 9 malam ( ada jam operasinya dan random )
+- Batas transaksi per hari 100 - 150 ( karna direkomendasikan 101 Transaksi saja perhari )
+- Ada delay per transaksi agar transaksi terlihat lebih natural
 
-_**SEBELUM MEMULAI ALANGKAH BAIKNYA LAKUKAN BEBERAPA HAL BERIKUT INI**_
+_**YOK DIMULAI**_
 
 # Claim Faucet kalian
 Claim disini : https://faucet-assam.tea.xyz/#/
@@ -48,3 +52,8 @@ Step by Step menggunakan botnya :
 - Selesai, selamat berbulking bulking ria~
 
 Join our telegram community here : https://t.me/ETRxCrypto
+
+Thanks for the Source :
+- KYC Adresses : https://tea.daov.xyz/kyc-address
+- Original Script : https://github.com/ashev33/bulk-transfer-tea
+- GPT
