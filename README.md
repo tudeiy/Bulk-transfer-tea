@@ -1,4 +1,4 @@
-# Bulk-transfer-tea
+# Bulk-transfer-tea By ETRx Crypto
 Send bulk transfer for Tea sepolia testnet
 
 Kalian bisa transfer tea secara massal ke banyak alamat di jaringan Tea Sepolia , Kalian setting setting aja ntar botnya mau kirim berapa berapanya dan ngatur jumlah token secara acak .
@@ -46,3 +46,5 @@ Step by Step menggunakan botnya :
 ```
 - Masukkan jumlah penerima dan Jumlah token yang akan dikirim
 - Selesai, selamat berbulking bulking ria~
+
+Join our telegram community here : https://t.me/ETRxCrypto
