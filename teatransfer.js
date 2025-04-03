@@ -1,15 +1,16 @@
-require("dotenv").config(); // Load variabel lingkungan dari .env
+require("dotenv").config(); // Memuat variabel lingkungan dari .env
 const { ethers } = require("ethers");
+const fs = require("fs");
 const readline = require("readline");
+const axios = require("axios");
 
 // Mengambil konfigurasi dari file .env
 const RPC_URL = process.env.RPC_URL;
-const CHAIN_ID = process.env.CHAIN_ID;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS;
 
-if (!PRIVATE_KEY || !RPC_URL || !TOKEN_ADDRESS || !CHAIN_ID) {
-    console.error("? ERROR: Pastikan file .env sudah dikonfigurasi dengan benar.");
+if (!PRIVATE_KEY || !RPC_URL || !TOKEN_ADDRESS) {
+    console.error("❌ ERROR: Pastikan file .env sudah dikonfigurasi dengan benar.");
     process.exit(1);
 }
 
@@ -27,75 +28,109 @@ const provider = new ethers.JsonRpcProvider(RPC_URL, {
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 const tokenContract = new ethers.Contract(TOKEN_ADDRESS, ERC20_ABI, wallet);
 
-// Fungsi untuk menghasilkan alamat acak
-function generateRandomAddresses(count) {
-    let addresses = [];
-    for (let i = 0; i < count; i++) {
-        let randomWallet = ethers.Wallet.createRandom();
-        addresses.push(randomWallet.address);
+// Fungsi untuk membaca daftar alamat dari file
+function readAddressesFromFile(filename) {
+    if (!fs.existsSync(filename)) return [];
+    const data = fs.readFileSync(filename, 'utf8');
+    return data.split('\n').map(line => line.trim()).filter(line => line !== '');
+}
+
+// Fungsi untuk menyimpan daftar alamat ke file
+function writeAddressesToFile(filename, addresses) {
+    fs.writeFileSync(filename, addresses.join('\n'), 'utf8');
+}
+
+// Fungsi untuk mengunduh daftar alamat KYC secara langsung dari website
+async function fetchKYCAddresses() {
+    try {
+        console.log("🌍 Mengunduh daftar alamat KYC...");
+        const response = await axios.get("https://tea.daov.xyz/kyc-address");
+        if (response.data && Array.isArray(response.data)) {
+            return response.data.map(addr => addr.trim().toLowerCase());
+        } else {
+            console.error("❌ ERROR: Format data KYC tidak valid.");
+            return [];
+        }
+    } catch (error) {
+        console.error("❌ ERROR: Gagal mengunduh daftar KYC.", error.message);
+        return [];
     }
-    return addresses;
 }
 
-// ?? FITUR BARU: Jam eksekusi yang diperbolehkan
-const allowedHours = [8, 12, 15, 19, 21];
+// Waktu operasi dalam jam WIB
+const operationalHours = [8, 12, 15, 19, 21];
 
-// ?? FITUR BARU: Pilih jam eksekusi secara acak
-function getRandomExecutionTime() {
-    return allowedHours[Math.floor(Math.random() * allowedHours.length)];
-}
-
-// ?? FITUR BARU: Tunggu hingga jam eksekusi tiba
-async function waitUntilExecution() {
-    let now = new Date();
-    let targetHour = getRandomExecutionTime();
-    
-    let executionTime = new Date();
-    executionTime.setHours(targetHour, 0, 0, 0);
-
-    if (executionTime < now) {
-        executionTime.setDate(executionTime.getDate() + 1); // Jika lewat, pindah ke hari berikutnya
+// Fungsi untuk menunggu sampai jam operasi
+async function waitForNextRun() {
+    while (true) {
+        let now = new Date();
+        let hour = now.getHours();
+        
+        if (operationalHours.includes(hour)) {
+            console.log(`🕒 Sekarang jam ${hour}:00 WIB, mulai mengirim transaksi...`);
+            return;
+        }
+        
+        console.log("🕒 Di luar jam operasi, menunggu...");
+        await new Promise(resolve => setTimeout(resolve, 60000)); // Cek setiap 1 menit
     }
-
-    let waitTime = executionTime - now;
-    console.log(`Menunggu hingga jam ${targetHour}:00 untuk mulai mengirim...`);
-    return new Promise(resolve => setTimeout(resolve, waitTime));
 }
 
-// ?? FITUR BARU: Delay antar transaksi (5 detik)
+// Fungsi untuk menunda eksekusi
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// ?? FITUR BARU: Fungsi otomatis untuk mengirim transaksi
-async function autoSendTokens() {
-    await waitUntilExecution(); // Tunggu waktu eksekusi
+async function main() {
+    await waitForNextRun();
 
     try {
         const decimals = await tokenContract.decimals();
-        const transactionCount = Math.floor(Math.random() * (300 - 100 + 1) + 100); // Random 100 - 300 transaksi
-        console.log(`Memulai pengiriman ${transactionCount} transaksi...`);
-
-        for (let i = 0; i < transactionCount; i++) {
-            let recipient = ethers.Wallet.createRandom().address; // Menggunakan alamat acak
-            const amountToSend = ethers.parseUnits("1.0", decimals); // Kirim 1 token (ubah sesuai kebutuhan)
-
-            try {
-                const tx = await tokenContract.transfer(recipient, amountToSend);
-                await tx.wait();
-                console.log(`${i + 1}. Berhasil dikirim ke ${recipient}`);
-            } catch (error) {
-                console.log(`${i + 1}. Gagal dikirim ke ${recipient} - ${error.message}`);
-            }
-
-            await delay(5000); // Jeda 5 detik antar transaksi
+        let kycAddresses = await fetchKYCAddresses();
+        if (kycAddresses.length === 0) {
+            console.error("❌ ERROR: Tidak ada alamat KYC yang ditemukan.");
+            return;
         }
 
-        console.log("? Semua transaksi selesai.");
+        let sentRecipients = readAddressesFromFile('kyc_addresses_sent.txt');
+        let recipients = kycAddresses.filter(addr => !sentRecipients.includes(addr));
+
+        if (recipients.length === 0) {
+            console.log("✅ Semua alamat KYC sudah menerima token.");
+            return;
+        }
+
+        console.log(`📋 Ada ${recipients.length} alamat yang belum menerima token.`);
+        
+        let transactionLimit = Math.min(recipients.length, Math.floor(Math.random() * (150 - 100 + 1) + 100));
+        console.log(`🔄 Akan mengirim ${transactionLimit} transaksi hari ini.`);
+
+        let failedRecipients = [];
+
+        for (let i = 0; i < transactionLimit; i++) {
+            try {
+                let recipient = recipients[i];
+                const amountToSend = ethers.parseUnits("1.0", decimals); // Kirim 1 token
+
+                const tx = await tokenContract.transfer(recipient, amountToSend);
+                await tx.wait();
+                console.log(`✅ ${i + 1}. Transaksi Berhasil (${recipient})`);
+
+                sentRecipients.push(recipient);
+            } catch (error) {
+                console.log(`❌ ${i + 1}. Transaksi Gagal (${recipients[i]}) - ${error.message}`);
+                failedRecipients.push(recipients[i]);
+            }
+            await delay(5000); // Jeda 5 detik
+        }
+
+        writeAddressesToFile('kyc_addresses_pending.txt', failedRecipients);
+        writeAddressesToFile('kyc_addresses_sent.txt', sentRecipients);
+
+        console.log("✅ Semua transaksi hari ini selesai.");
     } catch (error) {
-        console.error("? Terjadi kesalahan:", error);
+        console.error("❌ ERROR:", error);
     }
 }
 
-// ?? Jalankan mode otomatis
-autoSendTokens();
+main();
