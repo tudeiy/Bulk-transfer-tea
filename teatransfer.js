@@ -40,25 +40,25 @@ function writeAddressesToFile(filename, addresses) {
     fs.writeFileSync(filename, addresses.join('\n'), 'utf8');
 }
 
-// Fungsi untuk mengunduh daftar alamat KYC secara langsung dari website
+// Fungsi untuk mengunduh daftar alamat KYC secara langsung dari URL raw GitHub
 async function fetchKYCAddresses() {
     try {
-        console.log("🌍 Mengunduh daftar alamat KYC...");
-        const response = await axios.get("https://tea.daov.xyz/kyc-address");
-        if (response.data && Array.isArray(response.data)) {
-            return response.data.map(addr => addr.trim().toLowerCase());
+        console.log("🌍 Mengunduh daftar alamat KYC dari repository GitHub...");
+        const response = await axios.get("https://raw.githubusercontent.com/clwkevin/LayerOS/main/addressteasepoliakyc.txt");
+        if (response.data) {
+            return response.data.split('\n').map(addr => addr.trim().toLowerCase());
         } else {
-            console.error("❌ ERROR: Format data KYC tidak valid.");
+            console.error("❌ ERROR: Tidak dapat mengunduh data alamat KYC.");
             return [];
         }
     } catch (error) {
-        console.error("❌ ERROR: Gagal mengunduh daftar KYC.", error.message);
+        console.error("❌ ERROR: Gagal mengunduh daftar KYC dari GitHub.", error.message);
         return [];
     }
 }
 
 // Waktu operasi dalam jam WIB
-const operationalHours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
+const operationalHours = [8, 12, 15, 19, 21];
 
 // Fungsi untuk menunggu sampai jam operasi
 async function waitForNextRun() {
@@ -71,7 +71,7 @@ async function waitForNextRun() {
             return;
         }
         
-        console.log("Masih Di luar jam operasi, tunggu ya...");
+        console.log("🕒 Di luar jam operasi, menunggu...");
         await new Promise(resolve => setTimeout(resolve, 60000)); // Cek setiap 1 menit
     }
 }
@@ -102,7 +102,7 @@ async function main() {
 
         console.log(`📋 Ada ${recipients.length} alamat yang belum menerima token.`);
         
-        let transactionLimit = Math.min(recipients.length, Math.floor(Math.random() * (150 - 101 + 1) + 100));
+        let transactionLimit = Math.min(recipients.length, Math.floor(Math.random() * (150 - 100 + 1) + 100));
         console.log(`🔄 Akan mengirim ${transactionLimit} transaksi hari ini.`);
 
         let failedRecipients = [];
