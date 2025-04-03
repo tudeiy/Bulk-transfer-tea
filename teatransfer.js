@@ -1,11 +1,12 @@
 const { ethers } = require("ethers");
 const readline = require("readline");
+require("dotenv").config();
 
 // Konfigurasi jaringan Tea Sepolia
-const RPC_URL = "https://tea-sepolia.g.alchemy.com/public";
+const RPC_URL = process.env.RPC_URL || "https://tea-sepolia.g.alchemy.com/public";
 const CHAIN_ID = 10218;
-const PRIVATE_KEY = "PRIVATE_KEY_KALIAN";
-const TOKEN_ADDRESS = "CONTRACT_ADDRESS";
+const PRIVATE_KEY = process.env.PRIVATE_KEY || "PRIVATE_KEY_KALIAN";
+const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS || "CONTRACT_ADDRESS";
 
 // ABI ERC-20 minimal untuk transfer token
 const ERC20_ABI = [
@@ -69,3 +70,21 @@ async function main() {
 }
 
 main();
+
+// .gitignore file
+const fs = require('fs');
+const gitignoreContent = `
+# Environment variables
+.env
+
+# Node modules
+node_modules/
+
+# Log files
+*.log
+
+# Build artifacts
+dist/
+`;
+fs.writeFileSync(".gitignore", gitignoreContent);
+console.log(".gitignore telah dibuat!");
