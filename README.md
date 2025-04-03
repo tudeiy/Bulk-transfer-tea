@@ -18,7 +18,7 @@ Notes : Sesudah deploy, copy contract address token kalian
 # Install NPM dulu di Linux
 ```
 apt install npm
-
+```
 
 # Clone repositorynya
 ```
