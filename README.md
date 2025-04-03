@@ -1,9 +1,9 @@
-# Bulk-transfer-tea By ETRx Crypto
+# **Bulk-transfer-tea By ETRx Crypto**
 Send bulk transfer for Tea sepolia testnet
 
 Kalian bisa transfer tea secara massal ke banyak alamat di jaringan Tea Sepolia , Kalian setting setting aja ntar botnya mau kirim berapa berapanya dan ngatur jumlah token secara acak .
 
-**SEBELUM MEMULAI ALANGKAH BAIKNYA LAKUKAN BEBERAPA HAL BERIKUT INI**
+_**SEBELUM MEMULAI ALANGKAH BAIKNYA LAKUKAN BEBERAPA HAL BERIKUT INI**_
 
 # Claim Faucet kalian
 Claim disini : https://faucet-assam.tea.xyz/#/
