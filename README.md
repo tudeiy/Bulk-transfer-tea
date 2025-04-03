@@ -29,12 +29,15 @@ cd Bulk-transfer-tea
 screen -Rd bulktransfer
 ```
 
-# Install NPM dan dotenv dulu di Linux
+# Install NPM , dotenv sama axios dulu di Linux
 ```
 apt install npm
 ```
 ```
 npm install dotenv
+```
+```
+npm install axios
 ```
 
 # Install Dependencies
