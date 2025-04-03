@@ -1,4 +1,4 @@
-# **Bulk-transfer-tea By ETRx Crypto**
+# **Bulk-transfer-tea By ETRx Crypto ( DWYOR !!! )**
 Send bulk transfer for Tea sepolia testnet
 
 Fitur :
