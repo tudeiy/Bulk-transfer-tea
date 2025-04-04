@@ -96,8 +96,18 @@ async function waitForNextRun() {
 }
 
 // Fungsi untuk menunda eksekusi
+// Fungsi untuk menunda eksekusi
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Fungsi untuk menunda eksekusi dengan waktu acak 15-20 detik
+async function randomDelay() {
+    const min = 15000; // 15 detik
+    const max = 20000; // 20 detik
+    const delayTime = Math.floor(Math.random() * (max - min + 1)) + min;
+    console.log(`⏳ Menunggu ${delayTime / 1000} detik sebelum transaksi berikutnya...`);
+    await delay(delayTime);
 }
 
 async function askUserChoice() {
