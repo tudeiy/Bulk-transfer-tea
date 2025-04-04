@@ -198,5 +198,38 @@ async function main() {
     }
 }
 
-// Jalankan script
-main();
+        // 🕒 Fungsi untuk memilih waktu acak antara 9 AM - 1 PM WIB
+function getRandomExecutionTime() {
+    const startHour = 9;
+    const endHour = 13;
+    const now = new Date();
+
+    // Pilih waktu eksekusi acak dalam rentang 9 AM - 1 PM WIB
+    let randomHour = Math.floor(Math.random() * (endHour - startHour + 1)) + startHour;
+    let randomMinute = Math.floor(Math.random() * 60);
+    
+    let executionTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), randomHour, randomMinute, 0);
+
+    // Jika waktu eksekusi sudah lewat, jadwalkan untuk hari berikutnya
+    if (executionTime < now) {
+        executionTime.setDate(executionTime.getDate() + 1);
+    }
+
+    return executionTime.getTime() - now.getTime();
+}
+
+// 🔁 Fungsi untuk menjalankan script setiap hari di waktu acak
+async function scheduleDailyExecution() {
+    while (true) {
+        const delayMs = getRandomExecutionTime();
+        const executionTime = new Date(Date.now() + delayMs);
+        console.log(`⏳ Script akan dijalankan pada ${executionTime.toLocaleTimeString('id-ID')} WIB...`);
+
+        await delay(delayMs); // Tunggu sampai waktu eksekusi
+        await main();         // Jalankan script utama
+        console.log("✅ Script selesai. Menjadwalkan untuk hari berikutnya...");
+    }
+}
+
+// 🚀 Jalankan scheduler harian
+scheduleDailyExecution();
