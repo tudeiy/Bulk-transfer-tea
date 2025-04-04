@@ -1,7 +1,6 @@
 require("dotenv").config(); // Memuat variabel lingkungan dari .env
 const { ethers } = require("ethers");
 const fs = require("fs");
-const readline = require("readline");
 const axios = require("axios");
 
 // Mengambil konfigurasi dari file .env
@@ -22,20 +21,18 @@ const ERC20_ABI = [
 
 // Inisialisasi provider dan wallet
 const provider = new ethers.JsonRpcProvider(RPC_URL, {
-    chainId: 10218, // Chain ID untuk Tea Sepolia
+    chainId: 10218,
     name: "tea-sepolia"
 });
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 const tokenContract = new ethers.Contract(TOKEN_ADDRESS, ERC20_ABI, wallet);
 
-// Fungsi untuk membaca daftar alamat dari file
+// Fungsi membaca/simpan file
 function readAddressesFromFile(filename) {
     if (!fs.existsSync(filename)) return [];
     const data = fs.readFileSync(filename, 'utf8');
     return data.split('\n').map(line => line.trim()).filter(line => line !== '');
 }
-
-// Fungsi untuk menyimpan daftar alamat ke file
 function writeAddressesToFile(filename, addresses) {
     fs.writeFileSync(filename, addresses.join('\n'), 'utf8');
 }
@@ -44,7 +41,6 @@ function writeAddressesToFile(filename, addresses) {
 async function sendTelegramMessage(message) {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
-
     if (!botToken || !chatId) return;
 
     try {
@@ -58,7 +54,7 @@ async function sendTelegramMessage(message) {
     }
 }
 
-// Fungsi untuk mengunduh daftar alamat KYC secara langsung dari URL raw GitHub
+// 🔄 Fetch daftar alamat dari GitHub
 async function fetchKYCAddresses() {
     try {
         console.log("🌍 Mengunduh daftar alamat KYC dari repository GitHub...");
@@ -75,62 +71,20 @@ async function fetchKYCAddresses() {
     }
 }
 
-// Waktu operasi dalam jam WIB
-const operationalHours = [8, 12, 15, 19, 21];
-
-// Fungsi untuk menunggu sampai jam operasi
-async function waitForNextRun() {
-    while (true) {
-        let now = new Date();
-        let hour = new Date().getUTCHours() + 7;
-        if (hour >= 24) hour -= 24; // biar nggak lebih dari 23
-        
-        if (operationalHours.includes(hour)) {
-            console.log(`🕒 Sekarang jam ${hour}:00 WIB, mulai mengirim transaksi...`);
-            return;
-        }
-        
-        console.log("🕒 Di luar jam operasi, menunggu...");
-        await new Promise(resolve => setTimeout(resolve, 60000)); // Cek setiap 1 menit
-    }
-}
-
-// Fungsi untuk menunda eksekusi
-// Fungsi untuk menunda eksekusi
+// Delay util
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-// Fungsi untuk menunda eksekusi dengan waktu acak 15-20 detik
 async function randomDelay() {
-    const min = 15000; // 15 detik
-    const max = 20000; // 20 detik
+    const min = 15000;
+    const max = 20000;
     const delayTime = Math.floor(Math.random() * (max - min + 1)) + min;
     console.log(`⏳ Menunggu ${delayTime / 1000} detik sebelum transaksi berikutnya...`);
     await delay(delayTime);
 }
 
-async function askUserChoice() {
-    return new Promise((resolve) => {
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
-
-        rl.question("⚡ Apakah ingin menjalankan script sekarang? (y/n): ", (answer) => {
-            rl.close();
-            resolve(answer.trim().toLowerCase() === "y");
-        });
-    });
-}
-
+// 🔁 Script utama
 async function main() {
-    const runNow = await askUserChoice();
-
-    if (!runNow) {
-        await waitForNextRun(); // Tunggu sesuai jadwal operasional
-    }
-
     await sendTelegramMessage("🚀 *Script TeaTransfer dimulai!*");
 
     try {
@@ -182,7 +136,7 @@ async function main() {
                 await sendTelegramMessage(failMsg);
                 failedRecipients.push(recipients[i]);
             }
-            await delay(5000); // Jeda 5 detik
+            await delay(5000); // jeda antar transaksi
         }
 
         writeAddressesToFile('kyc_addresses_pending.txt', failedRecipients);
@@ -198,19 +152,17 @@ async function main() {
     }
 }
 
-        // 🕒 Fungsi untuk memilih waktu acak antara 9 AM - 1 PM WIB
+// 🕒 Pilih waktu acak antara 14:00–15:59 WIB
 function getRandomExecutionTime() {
-    const startHour = 9;
-    const endHour = 13;
+    const startHour = 14;
+    const endHour = 15;
     const now = new Date();
 
-    // Pilih waktu eksekusi acak dalam rentang 9 AM - 1 PM WIB
     let randomHour = Math.floor(Math.random() * (endHour - startHour + 1)) + startHour;
     let randomMinute = Math.floor(Math.random() * 60);
-    
+
     let executionTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), randomHour, randomMinute, 0);
 
-    // Jika waktu eksekusi sudah lewat, jadwalkan untuk hari berikutnya
     if (executionTime < now) {
         executionTime.setDate(executionTime.getDate() + 1);
     }
@@ -218,18 +170,18 @@ function getRandomExecutionTime() {
     return executionTime.getTime() - now.getTime();
 }
 
-// 🔁 Fungsi untuk menjalankan script setiap hari di waktu acak
+// 🔁 Jalankan setiap hari
 async function scheduleDailyExecution() {
     while (true) {
         const delayMs = getRandomExecutionTime();
         const executionTime = new Date(Date.now() + delayMs);
         console.log(`⏳ Script akan dijalankan pada ${executionTime.toLocaleTimeString('id-ID')} WIB...`);
 
-        await delay(delayMs); // Tunggu sampai waktu eksekusi
-        await main();         // Jalankan script utama
+        await delay(delayMs);
+        await main();
         console.log("✅ Script selesai. Menjadwalkan untuk hari berikutnya...");
     }
 }
 
-// 🚀 Jalankan scheduler harian
+// 🚀 Mulai scheduler harian
 scheduleDailyExecution();
