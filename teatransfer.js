@@ -115,7 +115,12 @@ async function askUserChoice() {
 }
 
 async function main() {
-    await waitForNextRun();
+    const runNow = await askUserChoice();
+
+    if (!runNow) {
+        await waitForNextRun(); // Tunggu sesuai jadwal operasional
+    }
+
     await sendTelegramMessage("🚀 *Script TeaTransfer dimulai!*");
 
     try {
@@ -139,16 +144,16 @@ async function main() {
         }
 
         console.log(`📋 Ada ${recipients.length} alamat yang belum menerima token.`);
-        
+
         let transactionLimit = Math.min(recipients.length, Math.floor(Math.random() * (150 - 100 + 1) + 100));
         const limitMsg = `🔄 Akan mengirim ${transactionLimit} transaksi hari ini.`;
         console.log(limitMsg);
         await sendTelegramMessage(limitMsg);
 
         let failedRecipients = [];
-        
+
         console.log("🔁 Memulai loop transaksi...");
-        
+
         for (let i = 0; i < transactionLimit; i++) {
             try {
                 let recipient = recipients[i];
@@ -183,4 +188,5 @@ async function main() {
     }
 }
 
+// Jalankan script
 main();
