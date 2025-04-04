@@ -40,6 +40,24 @@ function writeAddressesToFile(filename, addresses) {
     fs.writeFileSync(filename, addresses.join('\n'), 'utf8');
 }
 
+// 🔔 Fungsi kirim notifikasi ke Telegram
+async function sendTelegramMessage(message) {
+    const botToken = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
+
+    if (!botToken || !chatId) return;
+
+    try {
+        await axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            chat_id: chatId,
+            text: message,
+            parse_mode: "Markdown"
+        });
+    } catch (error) {
+        console.error("❌ Gagal kirim notifikasi Telegram:", error.message);
+    }
+}
+
 // Fungsi untuk mengunduh daftar alamat KYC secara langsung dari URL raw GitHub
 async function fetchKYCAddresses() {
     try {
@@ -84,12 +102,15 @@ function delay(ms) {
 
 async function main() {
     await waitForNextRun();
+    await sendTelegramMessage("🚀 *Script TeaTransfer dimulai!*");
 
     try {
         const decimals = await tokenContract.decimals();
         let kycAddresses = await fetchKYCAddresses();
         if (kycAddresses.length === 0) {
-            console.error("❌ ERROR: Tidak ada alamat KYC yang ditemukan.");
+            const msg = "❌ Tidak ada alamat KYC ditemukan.";
+            console.error(msg);
+            await sendTelegramMessage(msg);
             return;
         }
 
@@ -97,14 +118,18 @@ async function main() {
         let recipients = kycAddresses.filter(addr => !sentRecipients.includes(addr));
 
         if (recipients.length === 0) {
-            console.log("✅ Semua alamat KYC sudah menerima token.");
+            const msg = "✅ Semua alamat KYC sudah menerima token.";
+            console.log(msg);
+            await sendTelegramMessage(msg);
             return;
         }
 
         console.log(`📋 Ada ${recipients.length} alamat yang belum menerima token.`);
         
         let transactionLimit = Math.min(recipients.length, Math.floor(Math.random() * (150 - 100 + 1) + 100));
-        console.log(`🔄 Akan mengirim ${transactionLimit} transaksi hari ini.`);
+        const limitMsg = `🔄 Akan mengirim ${transactionLimit} transaksi hari ini.`;
+        console.log(limitMsg);
+        await sendTelegramMessage(limitMsg);
 
         let failedRecipients = [];
         
@@ -113,15 +138,19 @@ async function main() {
         for (let i = 0; i < transactionLimit; i++) {
             try {
                 let recipient = recipients[i];
-                const amountToSend = ethers.parseUnits("1.0", decimals); // Kirim 1 token
+                const amountToSend = ethers.parseUnits("1.0", decimals);
 
                 const tx = await tokenContract.transfer(recipient, amountToSend);
                 await tx.wait();
-                console.log(`✅ ${i + 1}. Transaksi Berhasil (${recipient})`);
+                const successMsg = `✅ ${i + 1}. Transaksi berhasil ke \`${recipient}\``;
+                console.log(successMsg);
+                await sendTelegramMessage(successMsg);
 
                 sentRecipients.push(recipient);
             } catch (error) {
-                console.log(`❌ ${i + 1}. Transaksi Gagal (${recipients[i]}) - ${error.message}`);
+                const failMsg = `❌ ${i + 1}. Transaksi gagal ke \`${recipients[i]}\`\n*Error:* ${error.message}`;
+                console.log(failMsg);
+                await sendTelegramMessage(failMsg);
                 failedRecipients.push(recipients[i]);
             }
             await delay(5000); // Jeda 5 detik
@@ -130,9 +159,13 @@ async function main() {
         writeAddressesToFile('kyc_addresses_pending.txt', failedRecipients);
         writeAddressesToFile('kyc_addresses_sent.txt', sentRecipients);
 
-        console.log("✅ Semua transaksi hari ini selesai.");
+        const doneMsg = "🎉 Semua transaksi hari ini *selesai*.";
+        console.log(doneMsg);
+        await sendTelegramMessage(doneMsg);
     } catch (error) {
+        const errorMsg = `❌ *Script error:* ${error.message}`;
         console.error("❌ ERROR:", error);
+        await sendTelegramMessage(errorMsg);
     }
 }
 
