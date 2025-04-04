@@ -1,4 +1,4 @@
-# **Bulk-transfer-tea By ETRx Crypto ( DWYOR !!! )**
+# The script was modified By ETRx Crypto & Airdrop Sambil Rebahan ( DWYOR !!! )**
 Send bulk transfer for Tea sepolia testnet
 
 Fitur :
@@ -46,6 +46,12 @@ npm install axios
 npm install ethers
 ```
 
+# Buka .env
+
+```
+nano .env
+```
+
 Step by Step menggunakan botnya :
 - Pastikan kalian sudah menyelesaikan semua hal diatas
 - Buka file .env di editor text vps kalian
@@ -55,7 +61,7 @@ Step by Step menggunakan botnya :
 - Save file .env nya
 - Jalankan scriptnya pake command ini :
 ```
-  node teatransfer.js
+node teatransfer.js
 ```
 - Masukkan jumlah penerima dan Jumlah token yang akan dikirim
 - Selesai, selamat berbulking bulking ria~
@@ -69,6 +75,7 @@ screen -r teasepolia
 - Kalo kalian mau matiin, tinggal klik CTRL + C
 
 Join our telegram community here : https://t.me/ETRxCrypto
+Join our telegram community here : https://t.me/kingfeeder
 
 Thanks for the Source :
 - KYC Adresses : https://tea.daov.xyz/kyc-address
