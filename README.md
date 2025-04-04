@@ -6,6 +6,8 @@ Fitur :
 - Pengiriman token di set secara random dari jam 8 pagi sampai 9 malam ( ada jam operasinya dan random )
 - Batas transaksi per hari 101 - 150 ( karna direkomendasikan 101 Transaksi saja perhari )
 - Ada delay per transaksi agar transaksi terlihat lebih natural
+- notifikasi via bot telegram
+- pilihan jalankan sekarang / sesuai jam script
 
 _**YOK DIMULAI**_
 
