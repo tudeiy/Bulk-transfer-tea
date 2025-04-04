@@ -64,7 +64,8 @@ const operationalHours = [8, 12, 15, 19, 21];
 async function waitForNextRun() {
     while (true) {
         let now = new Date();
-        let hour = now.getHours();
+        let hour = new Date().getUTCHours() + 7;
+        if (hour >= 24) hour -= 24; // biar nggak lebih dari 23
         
         if (operationalHours.includes(hour)) {
             console.log(`🕒 Sekarang jam ${hour}:00 WIB, mulai mengirim transaksi...`);
@@ -106,7 +107,9 @@ async function main() {
         console.log(`🔄 Akan mengirim ${transactionLimit} transaksi hari ini.`);
 
         let failedRecipients = [];
-
+        
+        console.log("🔁 Memulai loop transaksi...");
+        
         for (let i = 0; i < transactionLimit; i++) {
             try {
                 let recipient = recipients[i];
