@@ -20,13 +20,13 @@ Deploy Disini : https://sepolia.tea.xyz/address/0x847d23084C474E7a0010Da5Fa869b4
 
 # Clone repositorynya
 ```
-git clone https://github.com/freezydkz/Bulk-transfer-tea.git
+git clone https://github.com/tudeiy/Bulk-transfer-tea.git
 cd Bulk-transfer-tea
 ```
 
 # Create screen ( Biar bisa running di background )
 ```
-screen -Rd bulktransfer
+screen -S teasepolia
 ```
 
 # Install NPM , dotenv sama axios dulu di Linux
@@ -64,7 +64,7 @@ Notes :
 - Kalo kalian pengen botnya jalan di background, pencet CTRL A + D .
 - Kalo kalian mau balikin lagi botnya , pakai command ini
 ```
-screen -r bulktransfer
+screen -r teasepolia
 ```
 - Kalo kalian mau matiin, tinggal klik CTRL + C
 
