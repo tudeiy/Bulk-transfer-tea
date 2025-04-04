@@ -65,8 +65,8 @@ Step by Step menggunakan botnya :
 ```
 node teatransfer.js
 ```
-- Masukkan jumlah penerima dan Jumlah token yang akan dikirim
-- Selesai, selamat berbulking bulking ria~
+- pilih y untuk jalankan sekarang
+- pilih n untuk mengikut waktu otomatis
 
 Notes :
 - Kalo kalian pengen botnya jalan di background, pencet CTRL A + D .
