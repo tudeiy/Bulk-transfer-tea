@@ -75,6 +75,7 @@ screen -r teasepolia
 - Kalo kalian mau matiin, tinggal klik CTRL + C
 
 Join our telegram community here : https://t.me/ETRxCrypto
+
 Join our telegram community here : https://t.me/kingfeeder
 
 Thanks for the Source :
