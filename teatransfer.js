@@ -44,7 +44,7 @@ function writeAddressesToFile(filename, addresses) {
 async function fetchKYCAddresses() {
     try {
         console.log("🌍 Mengunduh daftar alamat KYC dari repository GitHub...");
-        const response = await axios.get("https://raw.githubusercontent.com/tudeiy/Bulk-transfer-tea/main/addressteasepoliakyc.txt");
+        const response = await axios.get("https://raw.githubusercontent.com/tudeiy/Bulk-transfer-tea/refs/heads/main/addressteasepoliakyc.txt");
         if (response.data) {
             return response.data.split('\n').map(addr => addr.trim().toLowerCase());
         } else {
