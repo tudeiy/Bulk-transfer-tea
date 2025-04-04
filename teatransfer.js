@@ -100,6 +100,20 @@ function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+async function askUserChoice() {
+    return new Promise((resolve) => {
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+
+        rl.question("⚡ Apakah ingin menjalankan script sekarang? (y/n): ", (answer) => {
+            rl.close();
+            resolve(answer.trim().toLowerCase() === "y");
+        });
+    });
+}
+
 async function main() {
     await waitForNextRun();
     await sendTelegramMessage("🚀 *Script TeaTransfer dimulai!*");
