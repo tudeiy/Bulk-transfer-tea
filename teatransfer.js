@@ -190,5 +190,14 @@ async function scheduleDailyExecution() {
     }
 }
 
-// ?? Mulai scheduler
-scheduleDailyExecution();
+        const args = process.argv.slice(2);
+if (args.includes('--now')) {
+    (async () => {
+        console.log("? Menjalankan script sekarang karena ada flag '--now'");
+        await main();
+        console.log("? Menjadwalkan script untuk hari berikutnya...");
+        await scheduleDailyExecution(); // lanjut seperti biasa
+    })();
+} else {
+    scheduleDailyExecution();
+}
