@@ -63,10 +63,8 @@ Step by Step menggunakan botnya :
 - Save file .env nya
 - Jalankan scriptnya pake command ini :
 ```
-node teatransfer.js
+node teatransfer.js --now
 ```
-- pilih y untuk jalankan sekarang
-- pilih n untuk mengikut waktu otomatis
 
 Notes :
 - Kalo kalian pengen botnya jalan di background, pencet CTRL A + D .
