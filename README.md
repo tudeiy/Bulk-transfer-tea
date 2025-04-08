@@ -25,6 +25,9 @@ Deploy Disini : https://sepolia.tea.xyz/address/0x847d23084C474E7a0010Da5Fa869b4
 git clone https://github.com/tudeiy/Bulk-transfer-tea.git
 cd Bulk-transfer-tea
 ```
+```
+mkdir accounts
+```
 
 # Create screen ( Biar bisa running di background )
 ```
