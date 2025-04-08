@@ -8,6 +8,7 @@ Fitur :
 - Ada delay per transaksi agar transaksi terlihat lebih natural
 - notifikasi via bot telegram
 - pilihan jalankan sekarang / sesuai jam script
+- Support Multi Acoount
 
 _**YOK DIMULAI**_
 
