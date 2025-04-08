@@ -1,202 +1,176 @@
-require("dotenv").config(); // Memuat variabel lingkungan dari .env
+require("dotenv").config();
 const { ethers } = require("ethers");
 const fs = require("fs");
 const axios = require("axios");
+const path = require("path");
 
-// Mengambil konfigurasi dari file .env
-const RPC_URL = process.env.RPC_URL;
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS;
+// 🔧 Load multi-account config
+const accounts = process.env.ACCOUNTS?.split(',').map(a => a.trim()).filter(Boolean) || [];
 
-if (!PRIVATE_KEY || !RPC_URL || !TOKEN_ADDRESS) {
-    console.error("? ERROR: Pastikan file .env sudah dikonfigurasi dengan benar.");
-    process.exit(1);
+// 🔧 Telegram
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+
+// 📤 Kirim pesan Telegram (hanya jika token & chat id tersedia)
+async function sendTelegramMessage(message) {
+    if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
+    try {
+        await axios.post(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            chat_id: TELEGRAM_CHAT_ID,
+            text: message,
+            parse_mode: "Markdown"
+        });
+    } catch (error) {
+        console.error("❌ Telegram Error:", error.response?.data || error.message);
+    }
 }
 
-// ABI ERC-20 minimal untuk transfer token
-const ERC20_ABI = [
-    "function transfer(address to, uint256 amount) public returns (bool)",
-    "function decimals() view returns (uint8)"
-];
+// ⛽ Delay utils
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+function randomDelay() {
+    const min = 15000;
+    const max = 20000;
+    const delayTime = Math.floor(Math.random() * (max - min + 1)) + min;
+    console.log(`⏱️ Delay ${delayTime / 1000}s sebelum transaksi berikutnya...`);
+    return delay(delayTime);
+}
 
-// Inisialisasi provider dan wallet
-const provider = new ethers.JsonRpcProvider(RPC_URL, {
-    chainId: 10218,
-    name: "tea-sepolia"
-});
-const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-const tokenContract = new ethers.Contract(TOKEN_ADDRESS, ERC20_ABI, wallet);
+// 📥 Ambil file dari GitHub
+async function fetchKYCAddresses() {
+    try {
+        console.log("🌐 Mengunduh daftar alamat KYC dari GitHub...");
+        const res = await axios.get("https://raw.githubusercontent.com/tudeiy/Bulk-transfer-tea/main/addressteasepoliakyc.txt");
+        return res.data.split('\n').map(addr => addr.trim().toLowerCase()).filter(Boolean);
+    } catch (error) {
+        console.error("❌ Gagal ambil KYC:", error.message);
+        return [];
+    }
+}
 
-// Fungsi membaca/simpan file
+// 📂 File utils
 function readAddressesFromFile(filename) {
     if (!fs.existsSync(filename)) return [];
     const data = fs.readFileSync(filename, 'utf8');
-    return data.split('\n').map(line => line.trim()).filter(line => line !== '');
+    return data.split('\n').map(line => line.trim().toLowerCase()).filter(Boolean);
 }
 function writeAddressesToFile(filename, addresses) {
     fs.writeFileSync(filename, addresses.join('\n'), 'utf8');
 }
 
-// ?? Fungsi kirim notifikasi ke Telegram
-async function sendTelegramMessage(message) {
-    const botToken = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_CHAT_ID;
-    if (!botToken || !chatId) return;
+// 🔁 Proses per akun
+async function runForAccount(accountName, index) {
+    const prefix = accountName.toUpperCase();
+    const PRIVATE_KEY = process.env[`${prefix}_PRIVATE_KEY`];
+    const RPC_URL = process.env[`${prefix}_RPC_URL`];
+    const TOKEN_ADDRESS = process.env[`${prefix}_TOKEN_ADDRESS`];
 
-    try {
-        await axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-            chat_id: chatId,
-            text: message,
-            parse_mode: "Markdown"
-        });
-    } catch (error) {
-        console.error("? Gagal kirim notifikasi Telegram:", error.message);
+    if (!PRIVATE_KEY || !RPC_URL || !TOKEN_ADDRESS) {
+        console.error(`❌ Konfigurasi tidak lengkap untuk ${accountName}`);
+        return;
     }
-}
 
-// ?? Fetch daftar alamat dari GitHub
-async function fetchKYCAddresses() {
-    try {
-        console.log("?? Mengunduh daftar alamat KYC dari repository GitHub...");
-        const response = await axios.get("https://raw.githubusercontent.com/tudeiy/Bulk-transfer-tea/main/addressteasepoliakyc.txt");
-        if (response.data) {
-            return response.data.split('\n').map(addr => addr.trim().toLowerCase());
-        } else {
-            console.error("? ERROR: Tidak dapat mengunduh data alamat KYC.");
-            return [];
-        }
-    } catch (error) {
-        console.error("? ERROR: Gagal mengunduh daftar KYC dari GitHub.", error.message);
-        return [];
-    }
-}
-
-// Delay utils
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-async function randomDelay() {
-    const min = 15000;
-    const max = 20000;
-    const delayTime = Math.floor(Math.random() * (max - min + 1)) + min;
-    console.log(`? Menunggu ${delayTime / 1000} detik sebelum transaksi berikutnya...`);
-    await delay(delayTime);
-}
-
-// ?? Script utama
-async function main() {
-    await sendTelegramMessage("?? *Script TeaTransfer dimulai!*");
+    const provider = new ethers.JsonRpcProvider(RPC_URL);
+    const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+    const token = new ethers.Contract(TOKEN_ADDRESS, [
+        "function transfer(address to, uint256 amount) public returns (bool)",
+        "function decimals() view returns (uint8)"
+    ], wallet);
 
     try {
-        const decimals = await tokenContract.decimals();
-        let kycAddresses = await fetchKYCAddresses();
-        if (kycAddresses.length === 0) {
-            const msg = "? Tidak ada alamat KYC ditemukan.";
-            console.error(msg);
-            await sendTelegramMessage(msg);
-            return;
-        }
+        const decimals = await token.decimals();
+        const amount = ethers.parseUnits("1.0", decimals);
+        const kyc = await fetchKYCAddresses();
 
-        let sentRecipients = readAddressesFromFile('kyc_addresses_sent.txt');
-        let recipients = kycAddresses.filter(addr => !sentRecipients.includes(addr));
+        const sentFile = path.join("accounts", `${accountName}_sent.txt`);
+        const pendingFile = path.join("accounts", `${accountName}_pending.txt`);
+
+        let sent = readAddressesFromFile(sentFile);
+        let recipients = kyc.filter(addr => !sent.includes(addr));
 
         if (recipients.length === 0) {
-            const msg = "? Semua alamat KYC sudah menerima token.";
-            console.log(msg);
-            await sendTelegramMessage(msg);
+            console.log(`✅ [${accountName}] Semua alamat sudah dikirimi.`);
+            await sendTelegramMessage(`✅ *Akun ${index + 1}* (${accountName}) tidak ada alamat baru untuk transfer.`);
             return;
         }
 
-        console.log(`?? Ada ${recipients.length} alamat yang belum menerima token.`);
+        const limit = Math.min(recipients.length, Math.floor(Math.random() * (150 - 100 + 1)) + 100);
+        await sendTelegramMessage(`📦 *Akun ${index + 1}* (${accountName}) akan mengirim ke *${limit}* alamat hari ini.`);
 
-        let transactionLimit = Math.min(recipients.length, Math.floor(Math.random() * (150 - 100 + 1) + 100));
-        const limitMsg = `?? Akan mengirim ${transactionLimit} transaksi hari ini.`;
-        console.log(limitMsg);
-        await sendTelegramMessage(limitMsg);
+        const shuffled = recipients.sort(() => 0.5 - Math.random()).slice(0, limit);
+        const failed = [];
 
-        let failedRecipients = [];
-
-        console.log("? Memulai loop transaksi...");
-
-        for (let i = 0; i < transactionLimit; i++) {
+        for (let i = 0; i < shuffled.length; i++) {
+            const recipient = shuffled[i];
             try {
-                let recipient = recipients[i];
-                const amountToSend = ethers.parseUnits("1.0", decimals);
-
-                const tx = await tokenContract.transfer(recipient, amountToSend);
+                const tx = await token.transfer(recipient, amount);
                 await tx.wait();
-                const successMsg = `? ${i + 1}. Transaksi berhasil ke \`${recipient}\``;
-                console.log(successMsg);
-                await sendTelegramMessage(successMsg);
-
-                sentRecipients.push(recipient);
-            } catch (error) {
-                const failMsg = `? ${i + 1}. Transaksi gagal ke \`${recipients[i]}\`\n*Error:* ${error.message}`;
-                console.log(failMsg);
-                await sendTelegramMessage(failMsg);
-                failedRecipients.push(recipients[i]);
+                console.log(`✅ [${accountName}] ${i + 1}/${limit} → ${recipient}`);
+                sent.push(recipient);
+            } catch (err) {
+                console.log(`❌ [${accountName}] Gagal ke ${recipient}: ${err.message}`);
+                await sendTelegramMessage(`❌ *Akun ${index + 1}* (${accountName}) gagal ke \`${recipient}\`\n_Error:_ ${err.message}`);
+                failed.push(recipient);
             }
-            await delay(5000); // jeda antar transaksi
+            await delay(5000);
         }
 
-        writeAddressesToFile('kyc_addresses_pending.txt', failedRecipients);
-        writeAddressesToFile('kyc_addresses_sent.txt', sentRecipients);
+        writeAddressesToFile(sentFile, sent);
+        writeAddressesToFile(pendingFile, failed);
 
-        const doneMsg = "?? Semua transaksi hari ini *selesai*.";
-        console.log(doneMsg);
-        await sendTelegramMessage(doneMsg);
-    } catch (error) {
-        const errorMsg = `? *Script error:* ${error.message}`;
-        console.error("? ERROR:", error);
-        await sendTelegramMessage(errorMsg);
+        await sendTelegramMessage(`✅ *Akun ${index + 1}* (${accountName}) selesai transfer.`);
+    } catch (e) {
+        console.error(`❌ [${accountName}] Error fatal:`, e.message);
+        await sendTelegramMessage(`❌ *Akun ${index + 1}* (${accountName}) error: ${e.message}`);
     }
 }
 
-// 🕒 MODE PRODUKSI: Jalankan antara jam 12:00 – 15:00 WIB setiap hari
+// 🧠 Jalankan semua akun
+async function runAllAccounts() {
+    await sendTelegramMessage("🚀 *Script TeaTransfer dimulai!*");
+    for (let i = 0; i < accounts.length; i++) {
+        await runForAccount(accounts[i], i);
+    }
+    await sendTelegramMessage("✅ *Semua akun selesai transfer hari ini.*");
+}
+
+// ⏰ Jadwal harian antara 12:00–15:00 WIB
 function getRandomExecutionTime() {
     const now = new Date();
+    const startUTC = 5;
+    const endUTC = 8;
 
-    // WIB = UTC+7 → 12:00–15:00 WIB = 05:00–08:00 UTC
-    const startHourUTC = 5;
-    const endHourUTC = 8;
+    const hour = Math.floor(Math.random() * (endUTC - startUTC + 1)) + startUTC;
+    const minute = Math.floor(Math.random() * 60);
 
-    const randomHour = Math.floor(Math.random() * (endHourUTC - startHourUTC + 1)) + startHourUTC;
-    const randomMinute = Math.floor(Math.random() * 60);
+    const target = new Date();
+    target.setUTCHours(hour, minute, 0, 0);
+    if (target <= now) target.setUTCDate(target.getUTCDate() + 1);
 
-    const targetTime = new Date();
-    targetTime.setUTCHours(randomHour, randomMinute, 0, 0);
-
-    // Kalau waktu target hari ini sudah lewat, jadwalkan untuk besok
-    if (targetTime <= now) {
-        targetTime.setUTCDate(targetTime.getUTCDate() + 1);
-    }
-
-    const delayMs = targetTime.getTime() - now.getTime();
-    console.log(`📅 Script dijadwalkan untuk ${targetTime.toLocaleTimeString('id-ID')} WIB`);
-
-    return delayMs;
+    const ms = target - now;
+    console.log(`📅 Script dijadwalkan untuk ${target.toLocaleTimeString('id-ID')} WIB`);
+    return ms;
 }
 
-// ?? Jalankan setiap hari (loop)
 async function scheduleDailyExecution() {
     while (true) {
         const delayMs = getRandomExecutionTime();
-        const executionTime = new Date(Date.now() + delayMs);
-        console.log(`? Script akan dijalankan pada ${executionTime.toLocaleTimeString('id-ID')} WIB...`);
-
+        const time = new Date(Date.now() + delayMs);
+        console.log(`🕒 Menunggu hingga ${time.toLocaleTimeString('id-ID')} WIB...`);
         await delay(delayMs);
-        await main();
-        console.log("? Script selesai. Menjadwalkan untuk hari berikutnya...");
+        await runAllAccounts();
+        console.log("✅ Selesai. Menjadwalkan hari berikutnya...");
     }
 }
 
-        const args = process.argv.slice(2);
+// 🚀 Eksekusi awal
+const args = process.argv.slice(2);
 if (args.includes('--now')) {
     (async () => {
-        console.log("? Menjalankan script sekarang karena ada flag '--now'");
-        await main();
-        console.log("? Menjadwalkan script untuk hari berikutnya...");
-        await scheduleDailyExecution(); // lanjut seperti biasa
+        console.log("🚀 Menjalankan sekarang karena ada flag '--now'");
+        await runAllAccounts();
+        await scheduleDailyExecution();
     })();
 } else {
     scheduleDailyExecution();
